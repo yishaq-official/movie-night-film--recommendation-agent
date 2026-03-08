@@ -7,6 +7,9 @@ from app.core.database import get_db
 from app.models import tables
 from app.schemas import schemas
 
+from typing import List
+from app.agent.recommender import GroupRecommendationAgent
+
 # Create a router specifically for session/room related endpoints
 router = APIRouter(prefix="/api/sessions", tags=["Sessions"])
 
@@ -53,3 +56,22 @@ def join_room(room_id: str, user: schemas.UserCreate, db: Session = Depends(get_
     db.commit()
     db.refresh(new_user)
     return new_user
+
+
+@router.get("/{room_id}/recommendations", response_model=List[schemas.RecommendedMovie])
+async def generate_room_recommendations(room_id: str, db: Session = Depends(get_db)):
+    """
+    Triggers the AI agent to calculate the best movies for the group.
+    """
+    room = db.query(tables.Room).filter(tables.Room.id == room_id).first()
+    if not room:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
+        
+    # Change status to show the room is no longer just gathering
+    room.status = "voting"
+    db.commit()
+
+    agent = GroupRecommendationAgent(db=db, room_id=room_id)
+    recommendations = await agent.get_recommendations()
+    
+    return recommendations
