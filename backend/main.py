@@ -1,8 +1,9 @@
 from fastapi import FastAPI
-from app.database import engine, Base
-from app import models 
+from app.core.database import engine
+from app.models import tables
 
-models.Base.metadata.create_all(bind=engine)
+# Create all tables in the database
+tables.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Movie Night Agent API")
 
