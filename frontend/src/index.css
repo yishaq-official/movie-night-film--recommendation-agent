@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+@theme {
+  --color-netflix: #E50914;
+  --color-dark: #141414;
+}
+
+/* Base styles */
+@layer base {
+  body {
+    background-color: var(--color-dark);
+    color: white;
+  }
+}

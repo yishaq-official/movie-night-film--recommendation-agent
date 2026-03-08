@@ -8,7 +8,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-dark text-white font-sans selection:bg-netflix selection:text-white">
-        {/* Simple Global Navbar */}
+        
         <nav className="p-6">
           <h1 className="text-3xl font-bold text-netflix tracking-wider">
             MOVIE NIGHT AGENT
