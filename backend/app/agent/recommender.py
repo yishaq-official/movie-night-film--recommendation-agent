@@ -1,8 +1,10 @@
-# backend/app/agent/recommender.py
+
+import asyncio
 from typing import List, Dict, Any
 from sqlalchemy.orm import Session
 from app.models import tables
 from app.services.tmdb import tmdb_client
+from app.services.youtube import youtube_client
 
 class GroupRecommendationAgent:
     def __init__(self, db: Session, room_id: str):
@@ -85,19 +87,17 @@ class GroupRecommendationAgent:
         # 3. Score using "Least Misery"
         for movie in candidates:
             user_scores = [self._calculate_user_score(movie, u.preferences) for u in room.users]
-            
             if not user_scores:
                 continue
                 
             avg_score = sum(user_scores) / len(user_scores)
             min_score = min(user_scores)
 
-            # Veto: If any single user scored it 0, drop the movie entirely
             if min_score == 0.0:
                 continue
 
-            # The Least Misery Formula
             final_score = (self.alpha * avg_score) + ((1.0 - self.alpha) * min_score)
+            release_year = int(movie.get("release_date", "2000")[:4]) if movie.get("release_date") else None
 
             movie_data = {
                 "tmdb_id": movie["id"],
@@ -106,10 +106,23 @@ class GroupRecommendationAgent:
                 "rating": movie.get("vote_average", 0.0),
                 "poster_url": f"https://image.tmdb.org/t/p/w500{movie.get('poster_path', '')}",
                 "popularity": movie.get("popularity", 0.0),
-                "match_score": round(final_score, 1)
+                "match_score": round(final_score, 1),
+                "year": release_year # Temporarily store year for the YouTube search
             }
             scored_movies.append(movie_data)
 
-        # 4. Sort by highest match score and return top 10
+        # 4. Sort and get Top 10
         scored_movies.sort(key=lambda x: x["match_score"], reverse=True)
-        return scored_movies[:10]
+        top_10 = scored_movies[:10]
+
+        # 5. Fetch YouTube Trailers Concurrently for the Top 10 ONLY
+        async def fetch_trailer_for_movie(movie: dict):
+            trailer_url = await youtube_client.get_trailer_url(movie["title"], movie["year"])
+            movie["trailer_url"] = trailer_url
+            movie.pop("year", None) # Clean up the temporary year key
+            return movie
+
+        # asyncio.gather runs all these tasks at the exact same time
+        final_movies = await asyncio.gather(*(fetch_trailer_for_movie(m) for m in top_10))
+
+        return list(final_movies)
