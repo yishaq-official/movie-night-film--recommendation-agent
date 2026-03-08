@@ -1,0 +1,12 @@
+# Web Framework & Server
+fastapi==0.110.0
+uvicorn[standard]==0.29.0
+
+# Database (SQLAlchemy for ORM)
+sqlalchemy==2.0.28
+
+# Async HTTP Client (for TMDb and YouTube API calls)
+httpx==0.27.0
+
+# Environment Variable Management
+python-dotenv==1.0.1
