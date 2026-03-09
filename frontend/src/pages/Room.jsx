@@ -22,11 +22,6 @@ const GENRES = [
 ];
 
 
-const THEMES = [
-  { id: 1568, name: 'Sniper' },
-  { id: 6091, name: 'Military Mission' }
-];
-
 
 export default function Room() {
   const { roomId } = useParams();
