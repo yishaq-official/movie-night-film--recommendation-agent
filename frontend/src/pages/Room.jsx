@@ -17,8 +17,16 @@ const GENRES = [
   { id: 9648, name: 'Mystery' },
   { id: 10749, name: 'Romance' },
   { id: 878, name: 'Sci-Fi' },
-  { id: 53, name: 'Thriller' }
+  { id: 53, name: 'Thriller' },
+  { id: 10752, name: 'War' }
 ];
+
+
+const THEMES = [
+  { id: 1568, name: 'Sniper' },
+  { id: 6091, name: 'Military Mission' }
+];
+
 
 export default function Room() {
   const { roomId } = useParams();
