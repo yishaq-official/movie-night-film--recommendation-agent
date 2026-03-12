@@ -33,7 +33,7 @@ class GroupRecommendationAgent:
             "without_genres": list(all_disliked_genres),
             "year_min": min(min_years) if min_years else None
         }
-
+       
     def _calculate_user_score(self, movie: Dict[str, Any], prefs: tables.Preference) -> float:
         """Calculates how much a single user will like a specific movie (0-100 scale)."""
         if not prefs:
